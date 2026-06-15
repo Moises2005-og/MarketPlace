@@ -26,13 +26,14 @@ RUN chmod -R 777 storage bootstrap/cache
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN npm install && npm run build
 
-# Definir a pasta pública como raiz do servidor web
-ENV FRANKENPHP_DOCUMENT_ROOT=/app/public
+# Definir o SERVER_NAME para escutar na porta 10000 em HTTP simples (sem SSL automático do Caddy)
+ENV SERVER_NAME="http://:10000"
 
 # Porta padrão que o Render utiliza
 ENV PORT=10000
 EXPOSE 10000
 
-# Cachear configurações, garantir o banco SQLite, rodar as migrations e iniciar o servidor na pasta pública
-CMD touch database/database.sqlite && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && frankenphp php-server --listen :10000 --root ./public
+# Cachear configurações, garantir o banco SQLite, rodar as migrations e iniciar o servidor usando o Caddyfile oficial do FrankenPHP
+CMD touch database/database.sqlite && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && frankenphp run --config /etc/caddy/Caddyfile
+
 

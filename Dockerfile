@@ -33,5 +33,6 @@ ENV FRANKENPHP_DOCUMENT_ROOT=/app/public
 ENV PORT=10000
 EXPOSE 10000
 
-# Cachear configurações e iniciar o servidor web do FrankenPHP
-CMD php artisan config:cache && php artisan route:cache && php artisan view:cache && frankenphp php-server --listen :10000
+# Cachear configurações, garantir o banco SQLite, rodar as migrations e iniciar o servidor na pasta pública
+CMD touch database/database.sqlite && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && frankenphp php-server --listen :10000 --root ./public
+

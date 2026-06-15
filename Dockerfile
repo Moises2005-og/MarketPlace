@@ -11,6 +11,9 @@ RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
 # Instalar extensões PHP necessárias para o Laravel e SQLite
 RUN install-php-extensions pcntl zip bcmath gd intl pdo_sqlite
 
+# Remover capacidades (capabilities) do binário do FrankenPHP para permitir execução no ambiente restrito do Render
+RUN apt-get update && apt-get install -y libcap2-bin && setcap -r /usr/local/bin/frankenphp
+
 WORKDIR /app
 
 # Copiar os arquivos do projeto

@@ -26,11 +26,15 @@ RUN npm install && npm run build
 # Criar arquivo .env e gerar a chave de criptografia (APP_KEY)
 RUN cp .env.example .env && php artisan key:generate
 
-# Garantir o banco SQLite e rodar as migrations durante o build
-RUN touch database/database.sqlite && php artisan migrate --force
+# Garantir o banco SQLite, rodar as migrations e os seeders durante o build
+RUN touch database/database.sqlite && php artisan migrate --force && php artisan db:seed --force
 
-# Configurar permissões para o Laravel (inclusive a pasta database para gravação do SQLite)
-RUN chmod -R 777 storage bootstrap/cache database
+# Criar o link simbólico da pasta de arquivos (storage)
+RUN php artisan storage:link
+
+# Configurar permissões para o Laravel (inclusive a pasta database e public/storage para gravação)
+RUN chmod -R 777 storage bootstrap/cache database public/storage
+
 
 # Definir o SERVER_NAME para escutar na porta 10000 em HTTP simples (sem SSL automático do Caddy)
 ENV SERVER_NAME="http://:10000"

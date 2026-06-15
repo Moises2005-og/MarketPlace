@@ -19,8 +19,8 @@ WORKDIR /app
 # Copiar os arquivos do projeto
 COPY . /app
 
-# Instalar dependências PHP e compilar o front-end (Vite)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Instalar dependências PHP (incluindo dev para o Faker poder rodar os seeders) e compilar o front-end (Vite)
+RUN composer install --optimize-autoloader --no-interaction
 RUN npm install && npm run build
 
 # Criar arquivo .env e gerar a chave de criptografia (APP_KEY)

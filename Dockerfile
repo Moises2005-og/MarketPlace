@@ -19,12 +19,18 @@ WORKDIR /app
 # Copiar os arquivos do projeto
 COPY . /app
 
-# Configurar permissões para o Laravel
-RUN chmod -R 777 storage bootstrap/cache
-
 # Instalar dependências PHP e compilar o front-end (Vite)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN npm install && npm run build
+
+# Criar arquivo .env e gerar a chave de criptografia (APP_KEY)
+RUN cp .env.example .env && php artisan key:generate
+
+# Garantir o banco SQLite e rodar as migrations durante o build
+RUN touch database/database.sqlite && php artisan migrate --force
+
+# Configurar permissões para o Laravel (inclusive a pasta database para gravação do SQLite)
+RUN chmod -R 777 storage bootstrap/cache database
 
 # Definir o SERVER_NAME para escutar na porta 10000 em HTTP simples (sem SSL automático do Caddy)
 ENV SERVER_NAME="http://:10000"
@@ -33,7 +39,8 @@ ENV SERVER_NAME="http://:10000"
 ENV PORT=10000
 EXPOSE 10000
 
-# Cachear configurações, garantir o banco SQLite, rodar as migrations e iniciar o servidor usando o Caddyfile oficial do FrankenPHP
-CMD touch database/database.sqlite && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && frankenphp run --config /etc/caddy/Caddyfile
+# Cachear configurações e iniciar o servidor usando o Caddyfile oficial do FrankenPHP
+CMD php artisan config:cache && php artisan route:cache && php artisan view:cache && frankenphp run --config /etc/caddy/Caddyfile
+
 
 
